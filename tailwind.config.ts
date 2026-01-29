@@ -13,6 +13,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -48,14 +51,31 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          bg: "hsl(var(--sidebar-bg))",
+          fg: "hsl(var(--sidebar-fg))",
+          muted: "hsl(var(--sidebar-muted))",
           accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+        },
+        canvas: {
+          bg: "hsl(var(--canvas-bg))",
+          grid: "hsl(var(--canvas-grid))",
+          dot: "hsl(var(--canvas-dot))",
+        },
+        node: {
+          cloud: "hsl(var(--node-cloud))",
+          cicd: "hsl(var(--node-cicd))",
+          container: "hsl(var(--node-container))",
+          monitoring: "hsl(var(--node-monitoring))",
+          security: "hsl(var(--node-security))",
+          database: "hsl(var(--node-database))",
+          messaging: "hsl(var(--node-messaging))",
+          config: "hsl(var(--node-config))",
+        },
+        connection: {
+          DEFAULT: "hsl(var(--connection-default))",
+          active: "hsl(var(--connection-active))",
+          success: "hsl(var(--connection-success))",
         },
       },
       borderRadius: {
@@ -63,27 +83,33 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        'node': 'var(--shadow-node)',
+        'node-hover': 'var(--shadow-node-hover)',
+      },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
+        "connection-flow": {
+          "0%": { strokeDashoffset: "20" },
+          "100%": { strokeDashoffset: "0" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+        "connection-flow": "connection-flow 1s linear infinite",
       },
     },
   },
