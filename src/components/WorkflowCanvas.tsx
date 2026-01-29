@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { WorkflowNode, Connection, NodeType } from '@/types/workflow';
 import { WorkflowNodeComponent } from './WorkflowNode';
 import { ConnectionLine, TempConnectionLine } from './ConnectionLine';
+import { EmptyCanvasState } from './EmptyCanvasState';
 import { cn } from '@/lib/utils';
 
 interface WorkflowCanvasProps {
@@ -19,6 +20,7 @@ interface WorkflowCanvasProps {
   onZoomChange: (zoom: number) => void;
   onPanChange: (pan: { x: number; y: number }) => void;
   onDrop: (nodeType: NodeType, position: { x: number; y: number }) => void;
+  onAddNode: () => void;
 }
 
 export function WorkflowCanvas({
@@ -36,6 +38,7 @@ export function WorkflowCanvas({
   onZoomChange,
   onPanChange,
   onDrop,
+  onAddNode,
 }: WorkflowCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isPanning, setIsPanning] = useState(false);
@@ -162,10 +165,11 @@ export function WorkflowCanvas({
     <div
       ref={canvasRef}
       className={cn(
-        "flex-1 overflow-hidden relative bg-canvas-bg",
+        "flex-1 overflow-hidden relative",
         isPanning && "cursor-grabbing",
         !isPanning && !draggedNode && "cursor-grab"
       )}
+      style={{ backgroundColor: 'hsl(225, 25%, 10%)' }}
       onMouseDown={handleCanvasMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -175,12 +179,21 @@ export function WorkflowCanvas({
     >
       {/* Grid background */}
       <div 
-        className="canvas-grid-bg absolute inset-0 canvas-grid"
+        className="canvas-grid-bg absolute inset-0"
         style={{
+          backgroundImage: `
+            linear-gradient(hsl(225, 20%, 15%) 1px, transparent 1px),
+            linear-gradient(90deg, hsl(225, 20%, 15%) 1px, transparent 1px)
+          `,
           backgroundPosition: `${pan.x}px ${pan.y}px`,
           backgroundSize: `${20 * zoom}px ${20 * zoom}px`,
         }}
       />
+
+      {/* Empty state */}
+      {nodes.length === 0 && (
+        <EmptyCanvasState onAddNode={onAddNode} />
+      )}
 
       {/* Transform container */}
       <div
@@ -241,13 +254,6 @@ export function WorkflowCanvas({
             />
           </div>
         ))}
-      </div>
-
-      {/* Zoom indicator */}
-      <div className="absolute bottom-4 left-4 px-3 py-1.5 bg-card/90 backdrop-blur-sm rounded-lg border border-border shadow-sm">
-        <span className="text-sm font-medium text-muted-foreground">
-          {Math.round(zoom * 100)}%
-        </span>
       </div>
     </div>
   );
