@@ -1,12 +1,8 @@
 import { useState, useCallback } from 'react';
-import { LeftIconSidebar } from '@/components/LeftIconSidebar';
-import { RightToolbar } from '@/components/RightToolbar';
-import { TopHeader } from '@/components/TopHeader';
+import { NodePalette } from '@/components/NodePalette';
 import { WorkflowCanvas } from '@/components/WorkflowCanvas';
 import { NodeConfigPanel } from '@/components/NodeConfigPanel';
-import { ZoomControls } from '@/components/ZoomControls';
-import { LogsPanel } from '@/components/LogsPanel';
-import { NodeSearchModal } from '@/components/NodeSearchModal';
+import { Toolbar } from '@/components/Toolbar';
 import { useWorkflow } from '@/hooks/useWorkflow';
 import { NodeType } from '@/types/workflow';
 import { toast } from 'sonner';
@@ -28,24 +24,14 @@ export default function WorkflowEditor() {
     endConnecting,
     runWorkflow,
     resetWorkflow,
+    clearWorkflow,
   } = useWorkflow();
 
   const [isRunning, setIsRunning] = useState(false);
-  const [activeTab, setActiveTab] = useState<'editor' | 'executions' | 'evaluations'>('editor');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [logs, setLogs] = useState<string[]>([]);
 
-  const handleAddNode = useCallback(() => {
-    setIsSearchOpen(true);
+  const handleDragStart = useCallback(() => {
+    // Optional: could show a ghost preview
   }, []);
-
-  const handleSelectNode = useCallback((nodeType: NodeType) => {
-    // Add node in the center of the visible canvas
-    const centerX = (window.innerWidth / 2 - canvasState.pan.x) / canvasState.zoom - 100;
-    const centerY = (window.innerHeight / 2 - canvasState.pan.y) / canvasState.zoom - 40;
-    addNode(nodeType, { x: centerX, y: centerY });
-    toast.success(`Added ${nodeType.name} node`);
-  }, [addNode, canvasState.pan, canvasState.zoom]);
 
   const handleDrop = useCallback((nodeType: NodeType, position: { x: number; y: number }) => {
     addNode(nodeType, position);
@@ -54,76 +40,90 @@ export default function WorkflowEditor() {
 
   const handleRun = useCallback(async () => {
     setIsRunning(true);
-    setLogs(prev => [...prev, `[${new Date().toISOString()}] Starting workflow execution...`]);
     toast.info('Executing workflow...');
     await runWorkflow();
-    setLogs(prev => [...prev, `[${new Date().toISOString()}] Workflow execution complete.`]);
     setIsRunning(false);
     toast.success('Workflow execution complete');
   }, [runWorkflow]);
 
-  return (
-    <div className="h-screen w-full flex overflow-hidden bg-background">
-      {/* Left icon sidebar */}
-      <LeftIconSidebar 
-        onAddNode={handleAddNode}
-        onSearch={() => setIsSearchOpen(true)}
-      />
+  const handleStop = useCallback(() => {
+    setIsRunning(false);
+    resetWorkflow();
+    toast.info('Workflow stopped');
+  }, [resetWorkflow]);
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 relative">
-        {/* Top header */}
-        <TopHeader
-          workflowName="My workflow"
-          projectName="My project"
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onRun={handleRun}
+  const handleSave = useCallback(() => {
+    const workflow = {
+      nodes,
+      connections,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem('opsflow-workflow', JSON.stringify(workflow));
+    toast.success('Workflow saved');
+  }, [nodes, connections]);
+
+  const handleLoad = useCallback(() => {
+    const saved = localStorage.getItem('opsflow-workflow');
+    if (saved) {
+      toast.info('Load functionality coming soon');
+    } else {
+      toast.error('No saved workflow found');
+    }
+  }, []);
+
+  const handleClear = useCallback(() => {
+    clearWorkflow();
+    toast.success('Canvas cleared');
+  }, [clearWorkflow]);
+
+  return (
+    <div className="h-screen w-full flex overflow-hidden">
+      {/* Left sidebar - Node palette */}
+      <div className="w-64 flex-shrink-0">
+        <NodePalette onDragStart={handleDragStart} />
+      </div>
+
+      {/* Main area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Toolbar */}
+        <Toolbar
+          zoom={canvasState.zoom}
           isRunning={isRunning}
           hasNodes={nodes.length > 0}
-        />
-
-        {/* Canvas area */}
-        <div className="flex-1 flex relative">
-          <WorkflowCanvas
-            nodes={nodes}
-            connections={connections}
-            selectedNodeId={canvasState.selectedNodeId}
-            connectingFrom={canvasState.connectingFrom}
-            zoom={canvasState.zoom}
-            pan={canvasState.pan}
-            onNodeSelect={selectNode}
-            onNodeDelete={deleteNode}
-            onNodeMove={updateNodePosition}
-            onConnectionStart={startConnecting}
-            onConnectionEnd={endConnecting}
-            onZoomChange={setZoom}
-            onPanChange={setPan}
-            onDrop={handleDrop}
-            onAddNode={handleAddNode}
-          />
-
-          {/* Right toolbar */}
-          <RightToolbar onAddNode={handleAddNode} />
-        </div>
-
-        {/* Zoom controls */}
-        <ZoomControls
-          zoom={canvasState.zoom}
           onZoomIn={() => setZoom(canvasState.zoom + 0.1)}
           onZoomOut={() => setZoom(canvasState.zoom - 0.1)}
           onZoomFit={() => {
             setZoom(1);
             setPan({ x: 0, y: 0 });
           }}
-          onUndo={resetWorkflow}
+          onRun={handleRun}
+          onStop={handleStop}
+          onReset={resetWorkflow}
+          onClear={handleClear}
+          onSave={handleSave}
+          onLoad={handleLoad}
         />
 
-        {/* Logs panel */}
-        <LogsPanel logs={logs} />
+        {/* Canvas */}
+        <WorkflowCanvas
+          nodes={nodes}
+          connections={connections}
+          selectedNodeId={canvasState.selectedNodeId}
+          connectingFrom={canvasState.connectingFrom}
+          zoom={canvasState.zoom}
+          pan={canvasState.pan}
+          onNodeSelect={selectNode}
+          onNodeDelete={deleteNode}
+          onNodeMove={updateNodePosition}
+          onConnectionStart={startConnecting}
+          onConnectionEnd={endConnecting}
+          onZoomChange={setZoom}
+          onPanChange={setPan}
+          onDrop={handleDrop}
+        />
       </div>
 
-      {/* Right config panel */}
+      {/* Right sidebar - Config panel */}
       {selectedNode && (
         <NodeConfigPanel
           node={selectedNode}
@@ -132,13 +132,6 @@ export default function WorkflowEditor() {
           onDelete={() => deleteNode(selectedNode.id)}
         />
       )}
-
-      {/* Node search modal */}
-      <NodeSearchModal
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        onSelectNode={handleSelectNode}
-      />
     </div>
   );
 }
