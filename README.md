@@ -5,7 +5,7 @@
 
 ## How can I edit this code?..r1
 .
-There are several ways of editing your application.
+There are several ways of editing your application.1
 
 **Use Lovable**
 
