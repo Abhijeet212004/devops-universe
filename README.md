@@ -4,7 +4,7 @@
 **URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID4
 ## How can I edit this code?..r1
 .
-There are several ways of editing your application.1
+There are several ways of editing your application.3
 
 **Use Lovable**
 
