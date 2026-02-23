@@ -1,4 +1,4 @@
-d# Welcome to your Lovable project
+fd# Welcome to your Lovable project
 
 ## Project info9
 **URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID43
