@@ -6,7 +6,7 @@ d# Welcome to your Lovable project
 .4
 There are several ways of editing your application.321fc
 2de
-**Use Lovable**
+**Use Lovable**4
 
 Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.1
 Changes made via Lovable will be committed automatically to this repo.
